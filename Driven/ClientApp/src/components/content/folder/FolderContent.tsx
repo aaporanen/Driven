@@ -58,7 +58,7 @@ const FolderContent: React.FC<{
     const [ctxMenuState, setCtxMenuState] = React.useState(ctxMenuInitialState);
     const [openDocument, setOpenDocument] = React.useState<IDocument>(null);
     const [selectedItem, setSelectedItem] = React.useState<{ item: IFolder | IDocument, isFolder: boolean }>(null);
-    const [dragTarget, setDragTarget] = React.useState<{ item: IFolder | IDocument, isFolder: boolean }>(null);
+    const [dropTarget, setDropTarget] = React.useState<{ item: IFolder | IDocument, isFolder: boolean }>(null);
 
     const handleCtxMenuOpen = (event: React.MouseEvent) => {
         if(openDocument) {
@@ -132,24 +132,24 @@ const FolderContent: React.FC<{
     }
 
     const handleDragStart = (item: IFolder | IDocument, isFolder: boolean) => {
-        setDragTarget(null);
+        setDropTarget(null);
         setSelectedItem({item, isFolder});
     }
 
     const handleDragOver = (item: IFolder | IDocument, isFolder: boolean) => {
-        if(item.id !== dragTarget?.item.id && item.id !== selectedItem?.item.id) {
-            setDragTarget({item, isFolder});
-            console.log({item, isFolder});
+        if(item.id !== dropTarget?.item.id && item.id !== selectedItem?.item.id) {
+            setDropTarget({item, isFolder});
         }
     }
 
     const handleDrop = () => {
+        if(!dropTarget.isFolder) return; //can't drop on documents.
+
         if(selectedItem.isFolder) {
-            const movedFolder = {...selectedItem.item, parentId: dragTarget.item.id} as IFolder;
-            onDropFolder(movedFolder);
-            
+            const movedFolder = {...selectedItem.item, parentId: dropTarget.item.id} as IFolder;
+            onDropFolder(movedFolder);       
         } else {
-            const movedDocument = {...selectedItem.item, folderId: dragTarget.item.id} as IDocument;
+            const movedDocument = {...selectedItem.item, folderId: dropTarget.item.id} as IDocument;
             onDropDocument(movedDocument);
         }
         setSelectedItem(null);
@@ -188,7 +188,7 @@ const FolderContent: React.FC<{
             />
     );
 
-    React.useEffect(() => console.log(dragTarget), [dragTarget]);
+    React.useEffect(() => console.log(dropTarget), [dropTarget]);
 
     return (
         <div 
