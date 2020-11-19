@@ -22,7 +22,7 @@ const FolderItem: React.FC<{
     onDelete: (item: IFolder | IDocument, isFolder: boolean) => void,
     onToggleFavorite: (item: IFolder | IDocument, isFolder: boolean) => void,
     onDragStart: (item: IFolder | IDocument, isFolder: boolean) => void,
-    onDragOver: (item: IFolder | IDocument, isFolder: boolean) => void,
+    onDragEnter: (item: IFolder | IDocument, isFolder: boolean) => void,
     onDrop: () => void
 }> = ({
     item,
@@ -34,7 +34,7 @@ const FolderItem: React.FC<{
     onDelete,
     onToggleFavorite,
     onDragStart,
-    onDragOver,
+    onDragEnter,
     onDrop
 }) => {
 
@@ -85,9 +85,12 @@ const FolderItem: React.FC<{
         onDragStart(item, isFolder);
     }
 
+    const handleDragEnter = (e: any) => {
+        onDragEnter(item, isFolder);
+    }
+
     const handleDragOver = (e: any) => {
-        e.preventDefault();
-        onDragOver(item, isFolder);
+        e.preventDefault();       
     }
 
     React.useEffect(() => {
@@ -107,6 +110,7 @@ const FolderItem: React.FC<{
             <Grid 
                 item 
                 xs={1}
+                onDragEnter={handleDragEnter}
                 onDragOver={handleDragOver} 
                 onDrop={onDrop}
             >

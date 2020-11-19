@@ -136,14 +136,13 @@ const FolderContent: React.FC<{
         setSelectedItem({item, isFolder});
     }
 
-    const handleDragOver = (item: IFolder | IDocument, isFolder: boolean) => {
-        if(item.id !== dropTarget?.item.id && item.id !== selectedItem?.item.id) {
-            setDropTarget({item, isFolder});
-        }
+    const handleDragEnter = (item: IFolder | IDocument, isFolder: boolean) => {
+        setDropTarget({item, isFolder});
     }
 
     const handleDrop = () => {
-        if(!dropTarget.isFolder) return; //can't drop on documents.
+        //don't handle drop on document or itself
+        if(!dropTarget.isFolder || dropTarget.item.key === selectedItem.item.key) return;
 
         if(selectedItem.isFolder) {
             const movedFolder = {...selectedItem.item, parentId: dropTarget.item.id} as IFolder;
@@ -167,7 +166,7 @@ const FolderContent: React.FC<{
                 onDelete={handleDelete}
                 onToggleFavorite={handleToggleFavorite}
                 onDragStart={handleDragStart}
-                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
                 onDrop={handleDrop}
             />
     );
@@ -183,12 +182,10 @@ const FolderContent: React.FC<{
                 onDelete={handleDelete}
                 onToggleFavorite={handleToggleFavorite}
                 onDragStart={handleDragStart}
-                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
                 onDrop={handleDrop}
             />
     );
-
-    React.useEffect(() => console.log(dropTarget), [dropTarget]);
 
     return (
         <div 
