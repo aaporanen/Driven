@@ -2,7 +2,7 @@
 
 todo:
 
-create hook for context menu.  
+create hook for context menu. - done!  
 redux takeover.  
 api.  
 backend.  
