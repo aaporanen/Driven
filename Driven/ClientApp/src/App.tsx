@@ -100,7 +100,7 @@ const App: React.FC<{}> = props => {
     const handleRenameDocument = (document: IDocument) => {
         if(!document.id) {
             const id = Math.random();
-            const key = "folder_" + id;
+            const key = "document_" + id;
             setDocuments([...documents.filter(_ => _.id), {...document, id, key}])
         } else {
             setDocuments([...documents.filter(_ => _.id !== document.id), document]);
