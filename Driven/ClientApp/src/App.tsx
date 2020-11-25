@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import TopNav from './TopNav';
-import FolderTree from './tree/FolderTree';
-import FolderContent from './content/folder/FolderContent';
+import TopNav from './components/TopNav';
+import FolderTree from './components/tree/FolderTree';
+import FolderContent from './components/content/folder/FolderContent';
 import Toolbar from '@material-ui/core/Toolbar';
-import { IFolder } from '../models/IFolder';
-import { IDocument } from '../models/IDocument';
-import { FolderType } from '../enums/FolderType';
-import TrashCanContent from './content/trashcan/TrashCanContent';
-import FavoriteContent from './content/favorites/FavoriteContent';
+import { IFolder } from './models/IFolder';
+import { IDocument } from './models/IDocument';
+import { FolderType } from './enums/FolderType';
+import TrashCanContent from './components/content/trashcan/TrashCanContent';
+import FavoriteContent from './components/content/favorites/FavoriteContent';
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -49,7 +49,7 @@ const favorites: IFolder = {
 
 const partitions = [driveRoot, trashCan, favorites];
 
-export const Base: React.FC<{}> = props => {
+const App: React.FC<{}> = props => {
     
     const classes = useStyles();
     
@@ -208,3 +208,5 @@ export const Base: React.FC<{}> = props => {
         </>
     );
 }
+
+export default App;
