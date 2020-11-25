@@ -9,6 +9,7 @@ import { faFileAlt } from '@fortawesome/free-regular-svg-icons';
 import FolderItem from './FolderItem';
 import DocumentContent from '../document/DocumentContent';
 import { FolderType } from '../../../enums/FolderType';
+import useContextMenu from '../../../hooks/useContextMenu';
 
 const useStyles = makeStyles((theme) => ({
     content: {
@@ -17,11 +18,6 @@ const useStyles = makeStyles((theme) => ({
         width: "100%"
     },
 }));
-
-const ctxMenuInitialState = {
-    mouseX: null,
-    mouseY: null,
-};
 
 const FolderContent: React.FC<{
     folder: IFolder,
@@ -55,24 +51,16 @@ const FolderContent: React.FC<{
     onDropDocument,
  }) => {
     const classes = useStyles();
-    const [ctxMenuState, setCtxMenuState] = React.useState(ctxMenuInitialState);
+
     const [openDocument, setOpenDocument] = React.useState<IDocument>(null);
     const [selectedItem, setSelectedItem] = React.useState<{ item: IFolder | IDocument, isFolder: boolean }>(null);
     const [dropTarget, setDropTarget] = React.useState<{ item: IFolder | IDocument, isFolder: boolean }>(null);
-
+    const ctxMenu = useContextMenu();
     const handleCtxMenuOpen = (event: React.MouseEvent) => {
         if(openDocument) {
             return;
         }
-        event.preventDefault();
-        setCtxMenuState({
-        mouseX: event.clientX - 2,
-        mouseY: event.clientY - 4,
-        });
-    };
-
-    const handleCtxMenuClose = () => {
-        setCtxMenuState(ctxMenuInitialState);
+        ctxMenu.open(event);
     };
 
     const handleOpen = (item: IFolder | IDocument, isFolder: boolean) => {
@@ -114,7 +102,7 @@ const FolderContent: React.FC<{
             isFavorite: false
         }
         onAddDocument(newDocument);
-        handleCtxMenuClose();
+        ctxMenu.close();
     }
 
     const handleAddFolder = () => {
@@ -128,7 +116,7 @@ const FolderContent: React.FC<{
             type: FolderType.Folder
         }
         onAddFolder(newFolder);
-        handleCtxMenuClose();
+        ctxMenu.close();
     }
 
     const handleDragStart = (item: IFolder | IDocument, isFolder: boolean) => {
@@ -200,14 +188,10 @@ const FolderContent: React.FC<{
 
             <Menu
                 keepMounted
-                open={ctxMenuState.mouseY !== null}
-                onClose={handleCtxMenuClose}
+                open={ctxMenu.isOpen}
+                onClose={ctxMenu.close}
                 anchorReference="anchorPosition"
-                anchorPosition={
-                    ctxMenuState.mouseY !== null && ctxMenuState.mouseX !== null
-                    ? { top: ctxMenuState.mouseY, left: ctxMenuState.mouseX }
-                    : undefined
-                }
+                anchorPosition={ctxMenu.position}
             >
             <MenuItem onClick={handleAddFolder}><FontAwesomeIcon fixedWidth icon={faFolder} /> New folder</MenuItem>
             <MenuItem onClick={handleAddDocument}><FontAwesomeIcon fixedWidth icon={faFileAlt} /> New document</MenuItem>

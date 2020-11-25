@@ -5,12 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ButtonBase, Grid, Input, Menu, MenuItem } from "@material-ui/core";
 import { IDocument } from "../../../models/IDocument";
 import { IFolder } from "../../../models/IFolder";
-
-const ctxMenuInitialState = {
-    mouseX: null,
-    mouseY: null,
-    isRenameInitiated: false
-};
+import useContextMenu from "../../../hooks/useContextMenu";
 
 const FolderItem: React.FC<{
     item: IFolder | IDocument,
@@ -38,26 +33,17 @@ const FolderItem: React.FC<{
     onDrop
 }) => {
 
-    const [ctxMenuState, setCtxMenuState] = React.useState(ctxMenuInitialState);
-
+    const ctxMenu = useContextMenu<{isRenameInitiated: boolean}>({ isRenameInitiated: false });
+    const isRenameInitiated = ctxMenu.state?.extras?.isRenameInitiated || false;
     const [isEditMode, setIsEditMode] = React.useState<boolean>(false);
 
     const handleCtxMenuOpen = (event: React.MouseEvent) => {
-        event.preventDefault();
-        event.stopPropagation();
+        ctxMenu.open(event)
         onSelect(item, isFolder);
-        setCtxMenuState({
-            mouseX: event.clientX - 2,
-            mouseY: event.clientY - 4,
-            isRenameInitiated: false
-        });
-    };
-
-    const handleCtxMenuClose = () => {
-        setCtxMenuState(ctxMenuInitialState);
     };
 
     const handleOpen = () => {
+        ctxMenu.close();
         onOpen(item, isFolder);      
     }
 
@@ -68,11 +54,11 @@ const FolderItem: React.FC<{
     }
 
     const handleBeginRename = () => {
-        setCtxMenuState({...ctxMenuInitialState, isRenameInitiated: true});       
+        ctxMenu.setExtras({ isRenameInitiated: true });   
     }
 
     const handleDelete = () => {
-        handleCtxMenuClose();
+        ctxMenu.close();
         onDelete(item, isFolder)          
     }
 
@@ -100,10 +86,11 @@ const FolderItem: React.FC<{
     }, [item])
 
     React.useEffect(() => {
-        if(ctxMenuState.isRenameInitiated) {
+        if(isRenameInitiated) {
+            ctxMenu.close();
             setIsEditMode(true);
         }
-    }, [ctxMenuState])
+    }, [ctxMenu])
 
     return (
         <>
@@ -136,16 +123,12 @@ const FolderItem: React.FC<{
                     <NameEditor originalName={item.name} onRename={handleEndRename} />
                 </>}
             </Grid>
-            {!!ctxMenuState.mouseY && <Menu
+            {ctxMenu.isOpen && <Menu
                 keepMounted
-                open={!!ctxMenuState.mouseY}
-                onClose={handleCtxMenuClose}
+                open={ctxMenu.isOpen}
+                onClose={ctxMenu.close}
                 anchorReference="anchorPosition"
-                anchorPosition={
-                    !!ctxMenuState.mouseY && !!ctxMenuState.mouseX
-                    ? { top: ctxMenuState.mouseY, left: ctxMenuState.mouseX }
-                    : undefined
-                }
+                anchorPosition={ctxMenu.position}
             >
                 <MenuItem onClick={handleOpen}><FontAwesomeIcon fixedWidth icon={faSearch} /> Open</MenuItem>
                 <MenuItem onClick={handleBeginRename}><FontAwesomeIcon fixedWidth icon={faPen} /> Rename</MenuItem>

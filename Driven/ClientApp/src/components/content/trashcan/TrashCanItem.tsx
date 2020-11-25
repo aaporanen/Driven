@@ -5,12 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ButtonBase, Grid, Menu, MenuItem } from "@material-ui/core";
 import { IDocument } from "../../../models/IDocument";
 import { IFolder } from "../../../models/IFolder";
-
-const ctxMenuInitialState = {
-    mouseX: null,
-    mouseY: null,
-    isRenameInitiated: false
-};
+import useContextMenu from "../../../hooks/useContextMenu";
 
 const TrashCanItem: React.FC<{
     item: IFolder | IDocument,
@@ -28,30 +23,20 @@ const TrashCanItem: React.FC<{
     onDeletePermanently 
 }) => {
 
-    const [ctxMenuState, setCtxMenuState] = React.useState(ctxMenuInitialState);
+    const ctxMenu = useContextMenu();
 
     const handleCtxMenuOpen = (event: React.MouseEvent) => {
-        event.preventDefault();
-        event.stopPropagation();
+        ctxMenu.open(event);
         onSelect(item, isFolder);
-        setCtxMenuState({
-            mouseX: event.clientX - 2,
-            mouseY: event.clientY - 4,
-            isRenameInitiated: false
-        });
-    };
-
-    const handleCtxMenuClose = () => {
-        setCtxMenuState(ctxMenuInitialState);
     };
 
     const handleRestore = (e: React.MouseEvent) => {
-        handleCtxMenuClose();
+        ctxMenu.close();
         onRestore(item, isFolder);      
     }
 
     const handleDeletePermanently = (e: React.MouseEvent) => {
-        handleCtxMenuClose();
+        ctxMenu.close();
         onDeletePermanently(item, isFolder)          
     }
 
@@ -71,16 +56,12 @@ const TrashCanItem: React.FC<{
                     <div>{item.name}</div>
                 </ButtonBase>
             </Grid>
-            {!!ctxMenuState.mouseY && <Menu
+            {ctxMenu.isOpen && <Menu
                 keepMounted
-                open={!!ctxMenuState.mouseY}
-                onClose={handleCtxMenuClose}
+                open={ctxMenu.isOpen}
+                onClose={ctxMenu.close}
                 anchorReference="anchorPosition"
-                anchorPosition={
-                    !!ctxMenuState.mouseY && !!ctxMenuState.mouseX
-                    ? { top: ctxMenuState.mouseY, left: ctxMenuState.mouseX }
-                    : undefined
-                }
+                anchorPosition={ctxMenu.position}
             >
                 <MenuItem onClick={handleRestore}><FontAwesomeIcon fixedWidth icon={faTrashRestore} /> Restore</MenuItem>
                 <MenuItem onClick={handleDeletePermanently}><FontAwesomeIcon fixedWidth icon={faTrash} /> Delete</MenuItem>

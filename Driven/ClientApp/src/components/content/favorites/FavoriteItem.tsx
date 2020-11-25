@@ -5,12 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ButtonBase, Grid, Menu, MenuItem } from "@material-ui/core";
 import { IDocument } from "../../../models/IDocument";
 import { IFolder } from "../../../models/IFolder";
-
-const ctxMenuInitialState = {
-    mouseX: null,
-    mouseY: null,
-    isRenameInitiated: false
-};
+import useContextMenu from "../../../hooks/useContextMenu";
 
 const FavoriteItem: React.FC<{
     item: IFolder | IDocument,
@@ -28,25 +23,15 @@ const FavoriteItem: React.FC<{
     onToggleFavorite
 }) => {
 
-    const [ctxMenuState, setCtxMenuState] = React.useState(ctxMenuInitialState);
+    const ctxMenu = useContextMenu();
 
     const handleCtxMenuOpen = (event: React.MouseEvent) => {
-        event.preventDefault();
-        event.stopPropagation();
+        ctxMenu.open(event);
         onSelect(item, isFolder);
-        setCtxMenuState({
-            mouseX: event.clientX - 2,
-            mouseY: event.clientY - 4,
-            isRenameInitiated: false
-        });
-    };
-
-    const handleCtxMenuClose = () => {
-        setCtxMenuState(ctxMenuInitialState);
     };
 
     const handleToggleFavorite = () => {
-        handleCtxMenuClose();
+        ctxMenu.close();
         const toggled = {...item, isFavorite: !item.isFavorite};
         onToggleFavorite(toggled, isFolder);
     }
@@ -68,18 +53,16 @@ const FavoriteItem: React.FC<{
                     <div>{item.name}</div>
                 </ButtonBase>
             </Grid>
-            {!!ctxMenuState.mouseY && <Menu
+            {ctxMenu.isOpen && <Menu
                 keepMounted
-                open={!!ctxMenuState.mouseY}
-                onClose={handleCtxMenuClose}
+                open={ctxMenu.isOpen}
+                onClose={ctxMenu.close}
                 anchorReference="anchorPosition"
-                anchorPosition={
-                    !!ctxMenuState.mouseY && !!ctxMenuState.mouseX
-                    ? { top: ctxMenuState.mouseY, left: ctxMenuState.mouseX }
-                    : undefined
-                }
+                anchorPosition={ctxMenu.position}
             >
-                <MenuItem onClick={handleToggleFavorite}><FontAwesomeIcon fixedWidth icon={item.isFavorite ? favorite : notFavorite} /> {!item.isFavorite ? "Add to favorites" : "Remove from favorites"}</MenuItem>
+                <MenuItem onClick={handleToggleFavorite}>
+                    <FontAwesomeIcon fixedWidth icon={item.isFavorite ? favorite : notFavorite} /> {!item.isFavorite ? "Add to favorites" : "Remove from favorites"}
+                </MenuItem>
             </Menu>}
         </>
     )

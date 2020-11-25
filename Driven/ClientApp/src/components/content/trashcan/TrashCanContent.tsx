@@ -5,6 +5,7 @@ import { IDocument } from '../../../models/IDocument';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import TrashCanItem from './TrashCanItem';
+import useContextMenu from '../../../hooks/useContextMenu';
 
 const useStyles = makeStyles((theme) => ({
     content: {
@@ -13,11 +14,6 @@ const useStyles = makeStyles((theme) => ({
         width: "100%"
     },
 }));
-
-const ctxMenuInitialState = {
-    mouseX: null,
-    mouseY: null,
-};
 
 const TrashCanContent: React.FC<{
     deletedFolders: IFolder[],
@@ -37,19 +33,12 @@ const TrashCanContent: React.FC<{
     onEmptyTrashCan
  }) => {
 
-    const [ctxMenuState, setCtxMenuState] = React.useState(ctxMenuInitialState);
+    const ctxMenu = useContextMenu();
     const [selectedItem, setSelectedItem] = React.useState<{ item: IFolder | IDocument, isFolder: boolean }>(null);
     const classes = useStyles();
-    const handleCtxMenuOpen = (event: React.MouseEvent) => {
-        event.preventDefault();
-        setCtxMenuState({
-        mouseX: event.clientX - 2,
-        mouseY: event.clientY - 4,
-        });
-    };
 
-    const handleCtxMenuClose = () => {
-        setCtxMenuState(ctxMenuInitialState);
+    const handleCtxMenuOpen = (event: React.MouseEvent) => {
+        ctxMenu.open(event);
     };
 
     const handleRestore = (item: IFolder | IDocument, isFolder: boolean) => {
@@ -63,6 +52,7 @@ const TrashCanContent: React.FC<{
         : onDeletePermanentlyDocument(item as IDocument);
     };
     const handleEmpty = () => {
+        ctxMenu.close();
         onEmptyTrashCan();
     };
 
@@ -102,14 +92,10 @@ const TrashCanContent: React.FC<{
 
             <Menu
                 keepMounted
-                open={ctxMenuState.mouseY !== null}
-                onClose={handleCtxMenuClose}
+                open={ctxMenu.isOpen}
+                onClose={ctxMenu.close}
                 anchorReference="anchorPosition"
-                anchorPosition={
-                    ctxMenuState.mouseY !== null && ctxMenuState.mouseX !== null
-                    ? { top: ctxMenuState.mouseY, left: ctxMenuState.mouseX }
-                    : undefined
-                }
+                anchorPosition={ctxMenu.position}
             >
             <MenuItem onClick={handleEmpty}><FontAwesomeIcon fixedWidth icon={faTrash} /> Empty</MenuItem>
         </Menu>
